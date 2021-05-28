@@ -1,5 +1,5 @@
 // get list of unlocked regions from komoot internal API
-regions = kmtBoot.getProps().packages.models.map((p) => {
+var regions = kmtBoot.getProps().packages.models.map((p) => {
 	return p.attributes.region.id
 });
 
@@ -20,8 +20,8 @@ script.onload = () => {
 		// create Map viewer
 		jQuery('<div/>', {
 			id: 'mapid',
-			style: 'width: 100%; height: 100%; position: absolute; left: 0; top: 0; z-index: 100000;'
-		}).appendTo('body');
+			style: 'width: 100%; height: 100%; position: relative; left: 0; top: 105%; z-index: 100000;'
+                }).appendTo( $( ".c-inline-map__container" ) );
 
 		var map = L.map('mapid').setView([48, 0], 5);
 		L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
