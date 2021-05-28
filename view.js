@@ -21,7 +21,7 @@ script.onload = () => {
 		jQuery('<div/>', {
 			id: 'mapid',
 			style: 'width: 100%; height: 100%; position: relative; left: 0; top: 105%; z-index: 100000;'
-                    }).appendTo( $( ".c-inline-map__container" ) );
+                }).appendTo( $( ".c-inline-map__container" ) );
 
 		var map = L.map('mapid').setView([48, 0], 5);
 		L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
