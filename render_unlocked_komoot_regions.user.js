@@ -12,7 +12,7 @@ function GM_main () {
 
         function loadScriptFromGithub() {
             const http = new XMLHttpRequest();
-            http.open("GET", "https://raw.githubusercontent.com/andreasbrett/komoot-unlocked-regions/master/view.js", true);
+            http.open("GET", "https://raw.githubusercontent.com/cahz/komoot-unlocked-regions/master/view.js", true);
             http.onreadystatechange = function() {
                 console.log(http.status);
                 if(http.readyState == 4 && http.status == 200) {
