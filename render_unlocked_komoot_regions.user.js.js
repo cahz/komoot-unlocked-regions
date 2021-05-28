@@ -2,7 +2,7 @@
 // @name         Render Unlocked Komoot Regions
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @include      /^https?://www.komoot\.(.*)/product/regions(.*)
+// @include      /^https?://www\.komoot\.(.*)/product/regions(.*)
 // @grant        none
 // ==/UserScript==
 
