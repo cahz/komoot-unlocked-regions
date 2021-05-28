@@ -20,7 +20,7 @@ script.onload = () => {
 		// create Map viewer
 		jQuery('<div/>', {
 			id: 'mapid',
-			style: 'width: 100%; height: 100%; position: absolute;'
+			style: 'width: 100%; height: 100%; position: absolute; left: 0; top: 0; z-index: 100000;'
 		}).appendTo('body');
 
 		var map = L.map('mapid').setView([48, 0], 5);
