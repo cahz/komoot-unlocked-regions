@@ -48,3 +48,5 @@ script.onload = () => {
 		});
 	};
 };
+
+console.log("You have %d free region(s) available!", kmtBoot.getProps().freeProducts.length);
