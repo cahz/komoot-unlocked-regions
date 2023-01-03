@@ -15,6 +15,10 @@ script.onload = () => {
 	var script = document.createElement('script');
 	script.src = "https://unpkg.com/leaflet@1.7.1/dist/leaflet.js";
 	document.getElementsByTagName('head')[0].appendChild(script);
+	var style = document.createElement('link');
+	style.rel = "stylesheet";
+	style.href = "https://unpkg.com/leaflet@1.7.1/dist/leaflet.css";
+	document.getElementsByTagName('head')[0].appendChild(style);
 
 	// wait for leaflet to load
 	script.onload = () => {
