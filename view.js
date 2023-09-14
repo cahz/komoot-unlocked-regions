@@ -15,18 +15,19 @@ function loadScripts(srcs, callback={}){
 	script.onload = () => {loadScripts(srcs, callback)};
 }
 
+// Load Leaflet style
 let style = document.createElement('link');
 style.rel = "stylesheet";
 style.href = "https://unpkg.com/leaflet@1.7.1/dist/leaflet.css";
 document.getElementsByTagName('head')[0].appendChild(style);
 
-// load jQuery, leaflet
-loadScripts(["https://code.jquery.com/jquery-3.6.0.min.js","https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"], () => {
+// load scripts: Leaflet
+loadScripts(["https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"], () => {
 	// create Map viewer
-	jQuery('<div/>', {
-		id: 'mapid',
-		style: 'width: 100%; height: 100%; position: relative; left: 0; top: 105%; z-index: 100000;'
-	}).appendTo( $( ".c-inline-map__container" ) );
+	let mapelem = document.createElement('div');
+	mapelem.id = 'mapid';
+	mapelem.style = 'width: 100%; height: 100%; position: relative; left: 0; top: 105%; z-index: 100000;';
+	document.getElementsByClassName("c-inline-map__container")[0].appendChild(mapelem);
 
 	let map = L.map('mapid').setView([48, 0], 5);
 	L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -37,19 +38,17 @@ loadScripts(["https://code.jquery.com/jquery-3.6.0.min.js","https://unpkg.com/le
 	regions.forEach(async (id) => {
 		if (id == 9999) {return}
 		// load region boundary and add as polygon
-		jQuery.ajax({
-			data: {'region': id},
-			headers: {'onlyprops': 'true'},
-			success: (json) => {
-				json.regions[0].geometry.forEach((p) => {
+		fetch("https://www.komoot.com/product/regions?region="+id, {headers: {'onlyprops': 'true'}})
+			.then(res => res.json())
+			.then(json => {
+				json.regions[0].geometry.forEach(p => {
 					let region = [];
 					p.forEach((i) => {
 						region.push([i.lat, i.lng]);
 					});
 					L.polygon(region).addTo(map);
 				});
-			}
-		});
+			});
 	});
 });
 
