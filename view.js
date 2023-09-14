@@ -37,7 +37,7 @@ script.onload = () => {
 		regions.forEach(async (id) => {
 			if (id == 9999) {return}
 			// load region boundary and add as polygon
-			$.ajax({
+			jQuery.ajax({
 				data: {'region': id},
 				headers: {'onlyprops': 'true'},
 				success: (json) => {
