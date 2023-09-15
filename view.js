@@ -38,7 +38,7 @@ loadScripts(["https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"], () => {
 	regions.forEach(async (id) => {
 		if (id == 9999) {return}
 		// load region boundary and add as polygon
-		fetch("https://www.komoot.com/product/regions?region="+id, {headers: {'onlyprops': 'true'}})
+		fetch("?region="+id, {headers: {'onlyprops': 'true'}})
 			.then(res => res.json())
 			.then(json => {
 				json.regions[0].geometry.forEach(p => {
