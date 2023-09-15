@@ -15,42 +15,70 @@ function loadScripts(srcs, callback={}){
 	script.onload = () => {loadScripts(srcs, callback)};
 }
 
-// Load Leaflet style
+// Load Maplibre style
 let style = document.createElement('link');
 style.rel = "stylesheet";
-style.href = "https://unpkg.com/leaflet@1.7.1/dist/leaflet.css";
+style.href = "https://unpkg.com/maplibre-gl/dist/maplibre-gl.css";
 document.getElementsByTagName('head')[0].appendChild(style);
 
-// load scripts: Leaflet
-loadScripts(["https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"], () => {
-	// create Map viewer
+// load scripts: Maplibre
+loadScripts(["https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"], () => {
 	let mapelem = document.createElement('div');
 	mapelem.id = 'mapid';
-	mapelem.style = 'width: 100%; height: 100%; position: relative; left: 0; top: 105%; z-index: 100000;';
-	document.getElementsByClassName("c-inline-map__container")[0].appendChild(mapelem);
+	mapelem.style.height = document.getElementsByClassName("c-inline-map__container")[0].getBoundingClientRect().height + "px"
+	document.getElementsByClassName("c-inline-map__container")[0].parentNode.parentNode.appendChild(mapelem);
 
-	let map = L.map('mapid').setView([48, 0], 5);
-	L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-		attribution: 'Map data &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-	}).addTo(map);
+	let map = new maplibregl.Map({
+		container: 'mapid',
+		style: 'https://tiles-api.maps.komoot.net/v1/style.json?optimize=true',
+		attribution: 'Maplibre | &copy; <a href="">komoot</a> | Map data &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+	});
+	map.addControl(new maplibregl.NavigationControl());
 
-	// iterate over unlocked regions and draw the result
-	regions.forEach(async (id) => {
-		if (id == 9999) {return}
-		// load region boundary and add as polygon
-		fetch("?region="+id, {headers: {'onlyprops': 'true'}})
-			.then(res => res.json())
-			.then(json => {
-				json.regions[0].geometry.forEach(p => {
-					let region = [];
-					p.forEach((i) => {
-						region.push([i.lat, i.lng]);
+	map.once("load", () => {
+		map.setLayoutProperty("komoot-region", 'visibility', 'visible'); // Enable the region layer
+		let allbounds = new maplibregl.LngLatBounds()
+
+		// iterate over unlocked regions and draw the result
+		regions.forEach(async (id) => {
+			if (id == 9999) {return}
+
+			// load regions and add them as geojson features
+			fetch("?region="+id, {headers: {'onlyprops': 'true'}})
+				.then(res => res.json())
+				.then(json => {
+					let counter = 0;
+					json.regions[0].geometry.forEach(p => {
+						counter++;
+						let region = [];
+						p.forEach((i) => {
+							region.push([i.lng, i.lat]);
+							allbounds.extend([i.lng, i.lat])
+						});
+
+						map.getSource('komoot_region').updateData({
+							add: [{
+								type: 'Feature',
+								id: id+"p"+counter,
+								geometry: {type: 'LineString', coordinates: region},
+								properties: {"region": json.regions[0].groupId==1,},
+							}]
+						});
 					});
-					L.polygon(region).addTo(map);
+					map.fitBounds(allbounds, {
+						padding: 20
+					});
 				});
-			});
+		});
 	});
 });
 
+
+availableRegions = kmtBoot.getProps().freeProducts.length;
+if(availableRegions>0){
+	let elem = document.createElement('span');
+	elem.innerHTML = "You have <b>"+availableRegions+"</b> free region"+(availableRegions!=1?"s":"")+" available!";
+	document.getElementsByClassName("c-inline-map__container")[0].parentNode.parentNode.parentNode.appendChild(elem);
+}
 
 console.log("You have %d free region(s) available!", kmtBoot.getProps().freeProducts.length);
