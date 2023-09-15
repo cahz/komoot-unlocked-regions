@@ -71,6 +71,22 @@ loadScripts(["https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"], () => {
 				});
 		});
 	});
+
+	map.on('click', 'komoot-region', (e) => {
+		const coordinates = e.features[0].geometry.coordinates;
+		const bounds = coordinates.reduce((bounds, coord) => {
+			return bounds.extend(coord);
+		}, new maplibregl.LngLatBounds(coordinates[0], coordinates[0]));
+
+		map.fitBounds(bounds, {
+			padding: 20
+		});
+	});
+
+	// Change the cursor to a pointer when the mouse is over the states layer.
+	map.on('mouseenter', 'komoot-region', () => { map.getCanvas().style.cursor = 'pointer'; });
+	map.on('mouseleave', 'komoot-region', () => { map.getCanvas().style.cursor = ''; });
+
 });
 
 
