@@ -31,13 +31,41 @@ loadScripts(["https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"], () => {
 	let map = new maplibregl.Map({
 		container: 'mapid',
 		style: 'https://tiles-api.maps.komoot.net/v1/style.json?optimize=true',
-		attribution: 'Maplibre | &copy; <a href="">komoot</a> | Map data &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
 	});
-	map.addControl(new maplibregl.NavigationControl());
+
+	// Colors as used by komoot for region bundle (red) and single region (blue)
+	let regionColor = [ "case", [ "boolean", [ "get", "region" ] ], [ "rgba", 16, 134, 232, 1 ], [ "rgba", 245, 82, 94, 1 ] ];
 
 	map.once("load", () => {
+		map.addControl(new maplibregl.NavigationControl());
+		map.addControl(new maplibregl.GeolocateControl());
+
 		map.setLayoutProperty("komoot-region", 'visibility', 'visible'); // Enable the region layer
-		let allbounds = new maplibregl.LngLatBounds()
+		map.addLayer({
+			id: 'custom-region-text',
+			source: 'komoot_region',
+			type: 'symbol',
+			minzoom: 6,
+			layout: {
+				'text-field': ['get', 'name'],
+				'text-font': ['Noto Sans Bold'],
+			},
+			paint: {
+				'text-color': regionColor,
+			}
+		});
+		map.addLayer({
+			id: 'custom-region-polygon',
+			source: 'komoot_region',
+			type: 'fill',
+			paint: {
+				'fill-color': regionColor,
+				'fill-opacity': 0.3,
+			}
+		},"custom-region-text"); // Draw polygons *under* text layer
+
+		// Prepare for initial zoom
+		let allbounds = new maplibregl.LngLatBounds();
 
 		// iterate over unlocked regions and draw the result
 		regions.forEach(async (id) => {
@@ -53,27 +81,31 @@ loadScripts(["https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"], () => {
 						let region = [];
 						p.forEach((i) => {
 							region.push([i.lng, i.lat]);
-							allbounds.extend([i.lng, i.lat])
+							allbounds.extend([i.lng, i.lat]);
 						});
 
 						map.getSource('komoot_region').updateData({
 							add: [{
-								type: 'Feature',
+								type: "Feature",
 								id: id+"p"+counter,
-								geometry: {type: 'LineString', coordinates: region},
-								properties: {"region": json.regions[0].groupId==1,},
+								geometry: {
+									type: "Polygon",
+									coordinates: [region],
+								},
+								properties: {
+									region: json.regions[0].groupId==1,
+									name: json.regions[0].name,
+								},
 							}]
 						});
 					});
-					map.fitBounds(allbounds, {
-						padding: 20
-					});
+					map.fitBounds(allbounds, {padding: 20}); // Zoom in
 				});
 		});
 	});
 
-	map.on('click', 'komoot-region', (e) => {
-		const coordinates = e.features[0].geometry.coordinates;
+	map.on('click', 'custom-region-polygon', (e) => {
+		const coordinates = e.features[0].geometry.coordinates[0];
 		const bounds = coordinates.reduce((bounds, coord) => {
 			return bounds.extend(coord);
 		}, new maplibregl.LngLatBounds(coordinates[0], coordinates[0]));
@@ -83,9 +115,9 @@ loadScripts(["https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"], () => {
 		});
 	});
 
-	// Change the cursor to a pointer when the mouse is over the states layer.
-	map.on('mouseenter', 'komoot-region', () => { map.getCanvas().style.cursor = 'pointer'; });
-	map.on('mouseleave', 'komoot-region', () => { map.getCanvas().style.cursor = ''; });
+	// Change the cursor to a pointer when the mouse is over the region layer.
+	map.on('mouseenter', 'custom-region-polygon', () => { map.getCanvas().style.cursor = 'pointer'; });
+	map.on('mouseleave', 'custom-region-polygon', () => { map.getCanvas().style.cursor = ''; });
 
 });
 
