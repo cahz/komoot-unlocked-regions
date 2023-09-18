@@ -31,6 +31,7 @@ loadScripts(["https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"], () => {
 	let map = new maplibregl.Map({
 		container: 'mapid',
 		style: 'https://tiles-api.maps.komoot.net/v1/style.json?optimize=true',
+		attributionControl: false,
 	});
 
 	// Colors as used by komoot for region bundle (red) and single region (blue)
@@ -39,6 +40,9 @@ loadScripts(["https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"], () => {
 	map.once("load", () => {
 		map.addControl(new maplibregl.NavigationControl());
 		map.addControl(new maplibregl.GeolocateControl());
+		map.addControl(new maplibregl.AttributionControl({
+			customAttribution: '<a href="https://github.com/maplibre/maplibre-gl-js">Maplibre</a> | &copy; <a href="http://www.komoot.com/">komoot</a>'
+		}))
 
 		map.setLayoutProperty("komoot-region", 'visibility', 'visible'); // Enable the region layer
 		map.addLayer({
