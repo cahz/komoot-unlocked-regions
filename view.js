@@ -38,11 +38,19 @@ loadScripts(["https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"], () => {
 	let regionColor = [ "case", [ "boolean", [ "get", "region" ] ], [ "rgba", 16, 134, 232, 1 ], [ "rgba", 245, 82, 94, 1 ] ];
 
 	map.once("load", () => {
+		for(let key in map.style?.sourceCaches){ // Remove komoot's wrong osm attribution
+			if(map.style.sourceCaches[key]?._source?.attribution){
+				map.style.sourceCaches[key]._source.attribution = "";
+			}
+		}
+
+		map.addControl(new maplibregl.AttributionControl({
+			customAttribution: ['<a href="https://github.com/maplibre/maplibre-gl-js">Maplibre</a>',
+				'&copy; <a href="https://www.komoot.com/">komoot</a>',
+				'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors']
+		}))
 		map.addControl(new maplibregl.NavigationControl());
 		map.addControl(new maplibregl.GeolocateControl());
-		map.addControl(new maplibregl.AttributionControl({
-			customAttribution: '<a href="https://github.com/maplibre/maplibre-gl-js">Maplibre</a> | &copy; <a href="http://www.komoot.com/">komoot</a>'
-		}))
 
 		map.setLayoutProperty("komoot-region", 'visibility', 'visible'); // Enable the region layer
 		map.addLayer({
